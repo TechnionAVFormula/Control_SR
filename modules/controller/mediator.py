@@ -1,17 +1,26 @@
 # from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import NamedTuple, Tuple
 
 import numpy as np
+import logging
 
 MAX_SPEED = 80  # max speed is 80 km/h
 SAMPLING_RATE = 40  # 40 samples per second
+ROAD_WIDTH = 3  # the road width in meters
+
+
+class FormulaStateMessageType(Enum):
+    only_prediction = 0
+    prediction_and_correction = 1
 
 
 @dataclass
 class State:
     """
+    :messege_type: enum to show which fields have been changed from the last state msg
     :deviation: position error radius [m]
     :r_road_bound: (N, 2) shape array of (x,y) coordinates, sampled from right edge of the road [m]
     :l_road_bound: (N, 2) shape array of (x,y) coordinates, sampled from left edge of the road [m]
@@ -26,6 +35,7 @@ class State:
     :prev_angle: the prev angle of the vehicle velocity vector and the road [radians]
 
     """
+    messege_type: FormulaStateMessageType
     deviation: float
     r_road_bound: np.ndarray
     l_road_bound: np.ndarray
@@ -53,6 +63,7 @@ class State:
         for r_cone in self.r_road_bound:
             r_cone = self._convert_to_car_coordinates(self.pos, r_cone)
         self.pos = np.array([0, 0])
+        logging.info("Updated coordinates system to the body's system")
         return self
 
 
@@ -64,11 +75,19 @@ class OutMsg(NamedTuple):
 
 
 def control_state_from_est(state_est):
-
     deviation = 0
     r_road_bound = []
     l_road_bound = []
-    for r_cone, l_cone in zip(state_est.right_bound_cones,state_est.left_bound_cones):
+
+    # TODO: add a patch - what to do if the car is normal to the road
+    if len(state_est.right_bound_cones) == 0:
+        logging.warning("Zero right bound cones are detected!")
+    if len(state_est.left_bound_cones) == 0:
+        logging.warning("Zero left bound cones are detected!")
+    if 0 < len(state_est.right_bound_cones) <= 4 and 0 < len(state_est.left_bound_cones) <= 4:
+        logging.warning("Only 4 cones or less, optimization may not work")
+
+    for r_cone, l_cone in zip(state_est.right_bound_cones, state_est.left_bound_cones):
         r_road_bound.append(np.array([r_cone.position.x, r_cone.position.y]))
         l_road_bound.append(np.array([l_cone.position.x, l_cone.position.y]))
 
@@ -77,15 +96,19 @@ def control_state_from_est(state_est):
     finished_lap = False
     dist_to_end = state_est.distance_to_finish
     speed = np.sqrt(state_est.current_state.velocity.x ** 2 + state_est.current_state.velocity.y ** 2)
-    speed_dev = np.sqrt(state_est.current_state.velocity_deviation.x ** 2 + state_est.current_state.velocity_deviation.y ** 2)
+    speed_dev = np.sqrt(
+        state_est.current_state.velocity_deviation.x ** 2 + state_est.current_state.velocity_deviation.y ** 2)
 
-    for r_cone,l_cone in zip(state_est.right_bound_cones,state_est.left_bound_cones):
-        if r_cone.r <= (speed + speed_dev)*SAMPLING_RATE:
+    for r_cone, l_cone in zip(state_est.right_bound_cones, state_est.left_bound_cones):
+        if r_cone.r <= (speed + speed_dev) * SAMPLING_RATE:
             deviation = max(deviation, r_cone.position_deviation)
         if l_cone.r <= (speed + speed_dev) * SAMPLING_RATE:
-                deviation = max(deviation, l_cone.position_deviation)
+            deviation = max(deviation, l_cone.position_deviation)
     deviation += state_est.current_state.position_deviation.y
+
+    if deviation >= ROAD_WIDTH/3:
+        logging.warning("The deviation is third of the road width or more, the route optimization may not work")
 
     return State(deviation=deviation, r_road_bound=np.array(r_road_bound), l_road_bound=np.array(l_road_bound),
                  angle=angle, pos=pos, finished_lap=finished_lap, dist_to_end=dist_to_end,
-                 speed=speed)
+                 speed=speed, messege_type=state_est.message_type)

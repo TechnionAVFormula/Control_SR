@@ -9,10 +9,10 @@ class ConfigEnum(Enum):
 # CONFIG = ConfigEnum.LOCAL_TEST
 
 
-IN_MESSAGE_FILE = 'Messages/input_test.messages'
+IN_MESSAGE_FILE = 'Messages/state.messages'
 OUT_MESSAGE_FILE = 'Messages/control.messages'
 
 # all options:
-CONFIG = ConfigEnum.COGNATA_SIMULATION
-# CONFIG = ConfigEnum.LOCAL_TEST
+# CONFIG = ConfigEnum.COGNATA_SIMULATION
+CONFIG = ConfigEnum.LOCAL_TEST
 # CONFIG = ConfigEnum.REAL_TIME

@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 from pure_pursuit.purePursuit import PurePursuitController
 from .mediator import State
 
@@ -21,6 +22,7 @@ class ActionPlanner:
 
     def update_action(self, state: State, p: np.ndarray):
         self.state = state
+        # TODO: check with ofir and adi if the p.p now needs and in rad
         self.state.angle = self.state.angle*180/3.141
         self.pp_controller.update_state(self.state.abs_pos[0]-self.state.abs_prev_pos[0],
                                         self.state.abs_pos[1]-self.state.abs_prev_pos[1],
@@ -39,12 +41,19 @@ class ActionPlanner:
                                     if (self.pp_controller.calculate_steering() < 0)
                                     else min(self.pp_controller.calculate_steering(),
                                              self._wheel_angle_upper_bound(state.speed, self.new_speed)))
+        # log printing
+        logging.info(f"Optimal steering angle is {self.new_wheel_angle}")
 
     def _calc_speed(self, p: np.ndarray):
         if self.state.dist_to_end < 0:
             self.new_speed = self._speed_upper_bound(p)
+            # log printing
+            logging.info("Speed is calculated by radius of curvature protocol")
         else:
             self.new_speed = self._clac_ending_speed(self.state.dist_to_end, self.state.speed)
+            # log printing
+            logging.info("Speed is calculated by ending speed protocol")
+        logging.info(f"Optimal speed is {self.new_speed}")
 
     def _clac_ending_speed(self, dist: float, speed: float):
         global FIRSTTIME
@@ -93,9 +102,15 @@ class ActionPlanner:
             self.new_gas = 0
         self.new_gas = (self.new_speed - self.state.speed)/V_MAX
 
+        # log printing
+        logging.info(f"Optimal gas is {self.new_gas}")
+
     def _calc_breaks(self):
         if self.state.speed <= self.new_speed:
             self.new_breaks = 0
         self.new_breaks = (self.state.speed - self.new_speed)/V_MAX
+
+        # log printing
+        logging.info(f"Optimal breaks is {self.new_breaks}")
 
 

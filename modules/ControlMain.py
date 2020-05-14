@@ -1,10 +1,10 @@
+import logging
 import signal
-import sys
 
-from config import CONFIG
-from config import ConfigEnum
+from modules.config import CONFIG
+from modules.config import ConfigEnum
 
-if CONFIG  == ConfigEnum.REAL_TIME or CONFIG == ConfigEnum.COGNATA_SIMULATION:
+if CONFIG == ConfigEnum.REAL_TIME or CONFIG == ConfigEnum.COGNATA_SIMULATION:
     from pyFormulaClient import messages
 elif CONFIG == ConfigEnum.LOCAL_TEST:
     from pyFormulaClientNoNvidia import messages
@@ -12,8 +12,10 @@ else:
     raise NameError('User Should Choose Configuration from config.py')
 
 # TODO: import path is probably going to change after integration into system runner
-from system_runner.modules.controller.controller import BasicController
-from system_runner.modules.ControlClient import ControlClient
+from modules.controller.controller import BasicController
+from modules.ControlClient import ControlClient
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Control:
@@ -23,6 +25,7 @@ class Control:
         self._running_id = 1
         self.message_timeout = 0.01
         self._controller = BasicController()
+        self.num_of_calc = 0
 
     def start(self):
         self._client.connect(1)
@@ -41,9 +44,12 @@ class Control:
 
         driving_instructions = messages.control.DriveInstructions()
 
+        logging.info(f"**** Calculation number {self.num_of_calc} ****")
+        self.num_of_calc += 1
+
         # Insert algorithms
         time = formula_state_msg.header.timestamp.ToMilliseconds()
-        
+
         out_msg = self._controller.process_state_est(formula_state, time)
         driving_instructions.gas = out_msg.gas
         driving_instructions.breaks = out_msg.breaks
@@ -98,6 +104,7 @@ def shutdown(a, b):
 
 def main():
     print("Initalized Control")
+    logging.info("Initalized Control")
 
     control.start()
     control.run()

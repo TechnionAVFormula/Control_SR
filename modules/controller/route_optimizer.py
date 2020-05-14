@@ -2,6 +2,7 @@ from typing import NamedTuple
 from functools import partial
 
 import numpy as np
+import logging
 from numpy import tan, abs, array, polyfit
 from scipy.integrate import quad
 from scipy.optimize import minimize
@@ -30,6 +31,8 @@ class RouteOptimizer:
         return 0
 
     def update_optimal_route(self, state: State):
+        # TODO: for polymonial road - optimal route needs to be calculated as a sum of polys.
+        #  may also solve the dependency in x_t
         self.state = state
         p0 = state.pos[1]
         p1 = tan(state.angle)
@@ -43,9 +46,18 @@ class RouteOptimizer:
             left_road = polyfit(state.l_road_bound[:, 0], state.l_road_bound[:, 1], 1)
             right_road = polyfit(state.r_road_bound[:, 0], state.r_road_bound[:, 1], 1)
             self.p = [0, 0, (left_road[0]+right_road[0])/2,  (left_road[1]+right_road[1])/2]
+
+            # log printing
+            logging.info(
+                f"Right bound poly is: x(y) = {right_road[0]}y+{right_road[1]}")
+            logging.info(
+                f"Left bound poly is: x(y) = {left_road[0]}y+{left_road[1]}")
+            logging.info(
+                f"Optimal route poly is: x(y) = {self.p[0]}y+{self.p[1]}")
             return
 
         # otherwise, optimize intensely!
+        # TODO: run time can probably be improved by replacing the lambdas to funcs
         road = lambda x, p2, p3: p3 * x ** 3 + p2 * x ** 2 + p1 * x + p0
         road_dx = lambda x, p2, p3: 3 * p3 * x ** 2 + 2 * p2 * x + p1
         road_d2x = lambda x, p2, p3: 6 * p3 * x + 2 * p2
@@ -73,6 +85,14 @@ class RouteOptimizer:
                                                          left_road_f=left_road_f, right_road_f=right_road_f,
                                                          state=state, p0=p0, p1=p1)}))
         self.p = np.array([p_min[1], p_min[0], p1, p0])
+
+        # log printing
+        logging.info(
+            f"Right bound poly is: x(y) = {right_road[0]}y**3+{right_road[1]}y**2+{right_road[2]}y+{right_road[3]}")
+        logging.info(
+            f"Left bound poly is: x(y) = {left_road[0]}y**3+{left_road[1]}y**2+{left_road[2]}y+{left_road[3]}")
+        logging.info(
+            f"Optimal route poly is: x(y) = {self.p[0]}y**3+{self.p[1]}y**2+{self.p[2]}y+{self.p[3]}")
 
     def get_optimal_route(self):
         return self.p
