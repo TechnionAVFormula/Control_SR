@@ -24,7 +24,7 @@ class Control:
         self._client = ControlClient()
         self._running_id = 1
         self.message_timeout = 0.01
-        self._controller = BasicController()
+        self._controller = BasicController(filename='control_BR.log')
         self.num_of_calc = 0
 
     def start(self):
