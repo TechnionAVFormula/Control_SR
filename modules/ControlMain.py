@@ -15,7 +15,7 @@ else:
 from modules.controller.controller import BasicController
 from modules.ControlClient import ControlClient
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, filename='control_BR.log')
 
 
 class Control:
@@ -24,7 +24,7 @@ class Control:
         self._client = ControlClient()
         self._running_id = 1
         self.message_timeout = 0.01
-        self._controller = BasicController(filename='control_BR.log')
+        self._controller = BasicController()
         self.num_of_calc = 0
 
     def start(self):
