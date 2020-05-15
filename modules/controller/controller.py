@@ -1,5 +1,5 @@
 from .action_planner import ActionPlanner
-from .mediator import State, OutMsg, control_state_from_est, FormulaStateMessageType
+from .mediator import State, OutMsg, DashMsg, control_state_from_est, FormulaStateMessageType
 from .route_optimizer import RouteOptimizer
 
 import logging
@@ -46,3 +46,24 @@ class BasicController:
         out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle, speed=self.action_planner.new_speed,
                          gas=self.action_planner.new_gas, breaks=self.action_planner.new_breaks)
         return out_msg
+
+    def get_dash_msg(self):
+        current_position = self.state.pos
+        # TODO: for now we use the car angle as the old steering angle, we need to change the dash or the info
+        current_steering_angle = self.state.angle
+        current_speed = self.state.speed
+        optimal_gas = self.action_planner.new_gas
+        optimal_breaks = self.action_planner.new_breaks
+        optimal_speed = self.action_planner.new_speed
+        optimal_steering = self.action_planner.new_wheel_angle
+        optimal_route = self.route_optimizer.p
+        right_bound = self.route_optimizer.right_bound_poly
+        left_bound = self.route_optimizer.left_bound_poly
+        right_bound_cones = self.state.r_road_bound
+        left_bound_cones = self.state.l_road_bound
+
+        dash_msg = DashMsg(current_position=current_position, current_steering_angle=current_steering_angle,
+                           current_speed=current_speed, optimal_gas=optimal_gas, optimal_breaks=optimal_breaks,
+                           optimal_speed=optimal_speed, optimal_steering=optimal_steering,
+                           optimal_route=optimal_route, right_bound=right_bound, left_bound=left_bound,
+                           right_bound_cones=right_bound_cones, left_bound_cones=left_bound_cones)

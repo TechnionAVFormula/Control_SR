@@ -74,6 +74,21 @@ class OutMsg(NamedTuple):
     breaks: float
 
 
+class DashMsg(NamedTuple):
+    current_position: np.ndarray
+    current_steering_angle: float
+    current_speed: float
+    optimal_gas: float
+    optimal_breaks: float
+    optimal_speed: float
+    optimal_steering: float
+    optimal_route: np.ndarray
+    right_bound: np.ndarray
+    left_bound: np.ndarray
+    right_bound_cones: np.ndarray
+    left_bound_cones: np.ndarray
+
+
 def control_state_from_est(state_est):
     deviation = 0
     r_road_bound = []

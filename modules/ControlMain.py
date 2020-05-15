@@ -15,7 +15,7 @@ else:
 from modules.controller.controller import BasicController
 from modules.ControlClient import ControlClient
 
-logging.basicConfig(level=logging.INFO, filename='control_BR.log')
+logging.basicConfig(level=logging.INFO, filename='control_BC.log')
 
 
 class Control:
@@ -43,6 +43,7 @@ class Control:
         formula_state_msg.Unpack(formula_state)
 
         driving_instructions = messages.control.DriveInstructions()
+        dash_instructions = messages.control.ControlDashbaord
 
         logging.info(f"**** Calculation number {self.num_of_calc} ****")
         self.num_of_calc += 1
@@ -55,6 +56,21 @@ class Control:
         driving_instructions.breaks = out_msg.breaks
         driving_instructions.steering = out_msg.wheel_angle
         driving_instructions.speed = out_msg.speed
+
+        # build the dashboard msg
+        # dash_msg = self._controller.get_dash_msg()
+        # dash_instructions.current_position = dash_msg.current_position
+        # dash_instructions.current_steering_angle = dash_msg.current_steering_angle
+        # dash_instructions.current_speed = dash_msg.current_speed
+        # dash_instructions.gas = dash_msg.optimal_gas
+        # dash_instructions.breaks = dash_msg.optimal_breaks
+        # dash_instructions.optimal_speed = dash_msg.optimal_speed
+        # dash_instructions.optimal_steering = dash_msg.optimal_steering
+        # dash_instructions.optimalRoute = dash_msg.optimal_route
+        # dash_instructions.rightBound = dash_msg.right_bound
+        # dash_instructions.leftBound = dash_msg.left_bound
+        # dash_instructions.rightBoundCones = dash_msg.right_bound_cones
+        # dash_instructions.leftBoundCones = dash_msg.left_bound_cones
 
         return driving_instructions
 

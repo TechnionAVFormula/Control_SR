@@ -14,6 +14,8 @@ class RouteOptimizer:
     def __init__(self, state: State):
         self.p = None
         self.state = state
+        self.right_bound_poly = None
+        self.left_bound_poly = None
 
     @staticmethod
     def _is_bound_ok(p: np.ndarray, left_road_f, right_road_f, state: State, p0, p1):
@@ -40,11 +42,15 @@ class RouteOptimizer:
         # Calculate polynomial-fit coefficients of the left, right edges
         left_road = polyfit(state.l_road_bound[:, 0], state.l_road_bound[:, 1], 3)
         right_road = polyfit(state.r_road_bound[:, 0], state.r_road_bound[:, 1], 3)
+        self.left_bound_poly = left_road
+        self.right_bound_poly = right_road
 
         # if the road is straight - no need for complex optimization
         if abs(left_road[0]) < 0.1 and abs(left_road[1]) < 0.1:
             left_road = polyfit(state.l_road_bound[:, 0], state.l_road_bound[:, 1], 1)
             right_road = polyfit(state.r_road_bound[:, 0], state.r_road_bound[:, 1], 1)
+            self.left_bound_poly = [0, 0, left_road[0], left_road[1]]
+            self.right_bound_poly = [0, 0, right_road[0], right_road[1]]
             self.p = [0, 0, (left_road[0]+right_road[0])/2,  (left_road[1]+right_road[1])/2]
 
             # log printing
