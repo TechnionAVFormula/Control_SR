@@ -6,8 +6,10 @@ from modules.config import ConfigEnum
 
 if CONFIG == ConfigEnum.REAL_TIME or CONFIG == ConfigEnum.COGNATA_SIMULATION:
     from pyFormulaClient import messages
+    from pyFormulaClient.MessageDeque import NoFormulaMessages
 elif CONFIG == ConfigEnum.LOCAL_TEST:
     from pyFormulaClientNoNvidia import messages
+    from pyFormulaClientNoNvidia.MessageDeque import NoFormulaMessages
 else:
     raise NameError('User Should Choose Configuration from config.py')
 
@@ -40,10 +42,10 @@ class Control:
 
     def process_formula_state_message(self, formula_state_msg):
         formula_state = messages.state_est.FormulaState()
-        formula_state_msg.Unpack(formula_state)
+        formula_state_msg.data.Unpack(formula_state)
 
         driving_instructions = messages.control.DriveInstructions()
-        dash_instructions = messages.control.ControlDashbaord
+        # dash_instructions = messages.control.ControlDashbaord
 
         logging.info(f"**** Calculation number {self.num_of_calc} ****")
         self.num_of_calc += 1
@@ -53,9 +55,9 @@ class Control:
 
         out_msg = self._controller.process_state_est(formula_state, time)
         driving_instructions.gas = out_msg.gas
-        driving_instructions.breaks = out_msg.breaks
-        driving_instructions.steering = out_msg.wheel_angle
-        driving_instructions.speed = out_msg.speed
+        driving_instructions.brakes = out_msg.brakes
+        driving_instructions.optimal_steering = out_msg.wheel_angle
+        driving_instructions.optimal_speed = out_msg.speed
 
         # build the dashboard msg
         # dash_msg = self._controller.get_dash_msg()
@@ -63,7 +65,7 @@ class Control:
         # dash_instructions.current_steering_angle = dash_msg.current_steering_angle
         # dash_instructions.current_speed = dash_msg.current_speed
         # dash_instructions.gas = dash_msg.optimal_gas
-        # dash_instructions.breaks = dash_msg.optimal_breaks
+        # dash_instructions.brakes = dash_msg.optimal_brakes
         # dash_instructions.optimal_speed = dash_msg.optimal_speed
         # dash_instructions.optimal_steering = dash_msg.optimal_steering
         # dash_instructions.optimalRoute = dash_msg.optimal_route
@@ -100,8 +102,10 @@ class Control:
                 formula_state = self._client.get_formula_state_message(timeout=self.message_timeout)
                 driving_instruction = self.process_formula_state_message(formula_state)
                 self.send_message2server(formula_state.header.id, driving_instruction)
-            except Exception as e:
+            except NoFormulaMessages:
                 pass
+            except Exception as e:
+                logging.exception(e)
 
 
 control = Control()

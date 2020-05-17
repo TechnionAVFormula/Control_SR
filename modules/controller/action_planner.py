@@ -16,7 +16,7 @@ class ActionPlanner:
         self.new_wheel_angle = None
         self.new_speed = None
         self.new_gas = None
-        self.new_breaks = None
+        self.new_brakes = None
         self.state = state
         self.pp_controller = PurePursuitController()
 
@@ -30,7 +30,7 @@ class ActionPlanner:
         self._calc_speed(p) 
         self._calc_wheel_ang(self.state)
         self.new_gas()
-        self.new_breaks()
+        self.new_brakes()
 
     def _calc_wheel_ang(self, state: State):
         if self.state.dist_to_end == 0:
@@ -105,12 +105,12 @@ class ActionPlanner:
         # log printing
         logging.info(f"Optimal gas is {self.new_gas}")
 
-    def _calc_breaks(self):
+    def _calc_brakes(self):
         if self.state.speed <= self.new_speed:
-            self.new_breaks = 0
-        self.new_breaks = (self.state.speed - self.new_speed)/V_MAX
+            self.new_brakes = 0
+        self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
 
         # log printing
-        logging.info(f"Optimal breaks is {self.new_breaks}")
+        logging.info(f"Optimal brakes is {self.new_brakes}")
 
 

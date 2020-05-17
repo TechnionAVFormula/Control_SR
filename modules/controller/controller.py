@@ -44,7 +44,7 @@ class BasicController:
         self._update_state(state)
 
         out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle, speed=self.action_planner.new_speed,
-                         gas=self.action_planner.new_gas, breaks=self.action_planner.new_breaks)
+                         gas=self.action_planner.new_gas, brakes=self.action_planner.new_brakes)
         return out_msg
 
     def get_dash_msg(self):
@@ -53,7 +53,7 @@ class BasicController:
         current_steering_angle = self.state.angle
         current_speed = self.state.speed
         optimal_gas = self.action_planner.new_gas
-        optimal_breaks = self.action_planner.new_breaks
+        optimal_brakes = self.action_planner.new_brakes
         optimal_speed = self.action_planner.new_speed
         optimal_steering = self.action_planner.new_wheel_angle
         optimal_route = self.route_optimizer.p
@@ -63,7 +63,7 @@ class BasicController:
         left_bound_cones = self.state.l_road_bound
 
         dash_msg = DashMsg(current_position=current_position, current_steering_angle=current_steering_angle,
-                           current_speed=current_speed, optimal_gas=optimal_gas, optimal_breaks=optimal_breaks,
+                           current_speed=current_speed, optimal_gas=optimal_gas, optimal_brakes=optimal_brakes,
                            optimal_speed=optimal_speed, optimal_steering=optimal_steering,
                            optimal_route=optimal_route, right_bound=right_bound, left_bound=left_bound,
                            right_bound_cones=right_bound_cones, left_bound_cones=left_bound_cones)

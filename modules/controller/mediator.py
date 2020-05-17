@@ -71,7 +71,7 @@ class OutMsg(NamedTuple):
     wheel_angle: float
     speed: float
     gas: float
-    breaks: float
+    brakes: float
 
 
 class DashMsg(NamedTuple):
@@ -79,7 +79,7 @@ class DashMsg(NamedTuple):
     current_steering_angle: float
     current_speed: float
     optimal_gas: float
-    optimal_breaks: float
+    optimal_brakes: float
     optimal_speed: float
     optimal_steering: float
     optimal_route: np.ndarray
@@ -106,7 +106,7 @@ def control_state_from_est(state_est):
         r_road_bound.append(np.array([r_cone.position.x, r_cone.position.y]))
         l_road_bound.append(np.array([l_cone.position.x, l_cone.position.y]))
 
-    angle = state_est.current_state.theta_absolute
+    angle = state_est.current_state.theta
     pos = np.array(state_est.current_state.position.x, state_est.current_state.position.y)
     finished_lap = False
     dist_to_end = state_est.distance_to_finish
