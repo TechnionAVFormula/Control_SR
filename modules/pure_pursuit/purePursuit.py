@@ -24,9 +24,10 @@ class PurePursuitController:
         self.coordinates = []
         self.orientation = 0 
         self.velocity = 0
+        self.reset_state(self.velocity)
             
     def update_state(self, dx, dy, v, d_orientation): # update the current state of the car in the controller for calculations
-        self.coordinates = [self.coordinates[0] + dx,self.coordinates[1] + dy]
+        self.coordinates = [self.coordinates[0] + dx, self.coordinates[1] + dy]
         self.velocity = v
         self.orientation += (d_orientation*2*math.pi/360)
 

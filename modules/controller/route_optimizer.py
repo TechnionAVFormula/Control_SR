@@ -12,7 +12,7 @@ from .mediator import State
 
 class RouteOptimizer:
     def __init__(self, state: State):
-        self.p = None
+        self.p = np.zeros((4,))
         self.state = state
         self.right_bound_poly = None
         self.left_bound_poly = None
@@ -51,7 +51,7 @@ class RouteOptimizer:
             right_road = polyfit(state.r_road_bound[:, 0], state.r_road_bound[:, 1], 1)
             self.left_bound_poly = [0, 0, left_road[0], left_road[1]]
             self.right_bound_poly = [0, 0, right_road[0], right_road[1]]
-            self.p = [0, 0, (left_road[0]+right_road[0])/2,  (left_road[1]+right_road[1])/2]
+            self.p = np.array([0, 0, (left_road[0]+right_road[0])/2,  (left_road[1]+right_road[1])/2])
 
             # log printing
             logging.info(

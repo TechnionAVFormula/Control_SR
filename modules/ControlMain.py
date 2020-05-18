@@ -17,7 +17,7 @@ else:
 from modules.controller.controller import BasicController
 from modules.ControlClient import ControlClient
 
-logging.basicConfig(level=logging.INFO, filename='control_BC.log')
+logging.basicConfig(level=logging.INFO, filename='control_BC.log', filemode='w')
 
 
 class Control:
