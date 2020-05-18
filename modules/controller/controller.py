@@ -17,20 +17,27 @@ class BasicController:
         for cone in state.l_road_bound:
             state.x_t = max(state.x_t, cone[0])
         state.abs_pos = state.pos
-        state.abs_prev_pos = self.state.abs_pos
-        state.prev_angle = self.state.angle
+        if self.state is None:
+            state.abs_prev_pos = [0, 0]
+            state.prev_angle = 0
+        else:
+            state.abs_prev_pos = self.state.abs_pos
+            state.prev_angle = self.state.angle
         converted_state = state.convert_coord_sys()
         self.state = converted_state
 
-        if state.messege_type == FormulaStateMessageType.finished_lap:
-            self.finished_lap = True
-        state.finished_lap = self.finished_lap
+# TODO: ask barak to change state msg, finished_lap as a msgType
+#         if state.messege_type == FormulaStateMessageType.finished_lap:
+#             self.finished_lap = True
+#         state.finished_lap = self.finished_lap
 
         if state.messege_type == FormulaStateMessageType.prediction_and_correction:
             self.route_optimizer.update_optimal_route(self.state)
             self.action_planner.pp_controller.update_path(self.route_optimizer.get_optimal_route(), self.state.speed)
-        if state.messege_type != FormulaStateMessageType.finished_lap:
-            self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
+# TODO: change the code back to the note when finished)lap is a msgtype
+        # if state.messege_type != FormulaStateMessageType.finished_lap:
+        #     self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
+        self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
 
     def process_state_est(self, state_est, time):
         if self.first_message_time == 0:

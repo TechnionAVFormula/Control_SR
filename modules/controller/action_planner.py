@@ -29,8 +29,8 @@ class ActionPlanner:
                                         self.state.speed,self.state.angle-self.state.prev_angle)
         self._calc_speed(p) 
         self._calc_wheel_ang(self.state)
-        self.new_gas()
-        self.new_brakes()
+        self._calc_gas()
+        self._calc_brakes()
 
     def _calc_wheel_ang(self, state: State):
         if self.state.dist_to_end == 0:
@@ -88,11 +88,14 @@ class ActionPlanner:
         road_d2x = lambda x: 6 * p[0] * x + 2 * p[1]
 
         # radius of curvature
-        rc = lambda x: abs(1 + road_dx(x) ** 2) ** (3 / 2) / abs(road_d2x(x))
+        if road_d2x(self.state.pos[0]) != 0:
+            rc = lambda x: abs(1 + road_dx(x) ** 2) ** (3 / 2) / abs(road_d2x(x))
+        else:
+            rc = lambda x: V_MAX
         # fastest velocity without sliding
         v = lambda x: min(np.sqrt(A_MAX * rc(x)), V_MAX)
 
-        return v  # it is a function of x, gives the maximal speed allowed without sliding
+        return v(self.state.pos[0])
 
     def _wheel_angle_upper_bound(self, old_speed: float, new_speed: float):
         return np.arctan(DELTA_T * (old_speed + new_speed) * 0.5 / (new_speed * new_speed / A_MAX))

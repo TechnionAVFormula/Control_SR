@@ -44,8 +44,8 @@ class State:
     finished_lap: bool
     dist_to_end: float
     speed: float
-    x_t: float = None
-    abs_pos: np.ndarray = None
+    x_t: float = 0
+    abs_pos: np.ndarray = np.array([0, 0])
     abs_prev_pos: np.ndarray = None
     prev_angle: float = None
 
@@ -107,7 +107,7 @@ def control_state_from_est(state_est):
         l_road_bound.append(np.array([l_cone.position.x, l_cone.position.y]))
 
     angle = state_est.current_state.theta
-    pos = np.array(state_est.current_state.position.x, state_est.current_state.position.y)
+    pos = np.array([state_est.current_state.position.x, state_est.current_state.position.y])
     finished_lap = False
     dist_to_end = state_est.distance_to_finish
     speed = np.sqrt(state_est.current_state.velocity.x ** 2 + state_est.current_state.velocity.y ** 2)
