@@ -103,7 +103,8 @@ class ActionPlanner:
     def _calc_gas(self):
         if self.new_speed <= self.state.speed:
             self.new_gas = 0
-        self.new_gas = (self.new_speed - self.state.speed)/V_MAX
+        else:
+            self.new_gas = (self.new_speed - self.state.speed)/V_MAX
 
         # log printing
         logging.info(f"Optimal gas is {self.new_gas}")
@@ -111,9 +112,11 @@ class ActionPlanner:
     def _calc_brakes(self):
         if self.state.speed <= self.new_speed:
             self.new_brakes = 0
-        self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
+        else:
+            self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
 
         # log printing
         logging.info(f"Optimal brakes is {self.new_brakes}")
+
 
 

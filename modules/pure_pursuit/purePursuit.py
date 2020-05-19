@@ -41,7 +41,7 @@ class PurePursuitController:
         self.reset_state(v)
 
     def calculate_steering(self): # calc the needed steering angle to course correct to the next waypoint
-        ld = self.velocity * self._kdd
+        ld = max(self.velocity * self._kdd, 2)
         look_ahead_point = self._calculate_look_ahead_point(ld)
 
         alpha = math.atan2(look_ahead_point[1] - self.coordinates[1], look_ahead_point[0] - self.coordinates[0]) - self.orientation # error angle
@@ -51,9 +51,9 @@ class PurePursuitController:
     def _calculate_look_ahead_point(self, ld):
         x_vec = solve((self.path[3]*x**3 + self.path[2]*x**2 + self.path[1]*x + self.path[0] - self.coordinates[1])**2 + (x - self.coordinates[0])**2 - ld**2, x)
         for p in x_vec:
-            if not np.iscomplex(x):
+            if p.is_real:
                 if p > self.coordinates[0]:
-                    return [p, self.path(p)]
+                    return [float(p), float(self.path(float(p)))]
 
 
 
