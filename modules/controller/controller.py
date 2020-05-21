@@ -4,6 +4,8 @@ from .route_optimizer import RouteOptimizer
 
 import logging
 
+MAX_STEERING = 0.383972435 # the max steering angle in radians, equals to 22 degrees
+
 
 class BasicController:
     def __init__(self):
@@ -57,7 +59,7 @@ class BasicController:
     def get_dash_msg(self):
         current_position = self.state.pos
         # TODO: for now we use the car angle as the old steering angle, we need to change the dash or the info
-        current_steering_angle = self.state.angle
+        current_steering_angle = self.state.angle/MAX_STEERING
         current_speed = self.state.speed
         optimal_gas = self.action_planner.new_gas
         optimal_brakes = self.action_planner.new_brakes
