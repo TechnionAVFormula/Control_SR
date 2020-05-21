@@ -22,8 +22,8 @@ class ActionPlanner:
 
     def update_action(self, state: State, p: np.ndarray):
         self.state = state
-        # TODO: check with ofir and adi if the p.p now needs and in rad
-        self.state.angle = self.state.angle*180/3.141
+        # TODO: check with ofir and adi if the p.p now needs and in rad, now in rads
+        self.state.angle = self.state.angle
         self.pp_controller.update_state(self.state.abs_pos[0]-self.state.abs_prev_pos[0],
                                         self.state.abs_pos[1]-self.state.abs_prev_pos[1],
                                         self.state.speed,self.state.angle-self.state.prev_angle)
