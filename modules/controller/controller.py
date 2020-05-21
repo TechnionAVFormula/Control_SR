@@ -28,24 +28,22 @@ class BasicController:
         converted_state = state.convert_coord_sys()
         self.state = converted_state
 
-# TODO: ask barak to change state msg, finished_lap as a msgType
-#         if state.messege_type == FormulaStateMessageType.finished_lap:
-#             self.finished_lap = True
-#         state.finished_lap = self.finished_lap
+        if state.messege_type == FormulaStateMessageType.finished_lap:
+            self.finished_lap = True
+        state.finished_lap = self.finished_lap
 
         if state.messege_type == FormulaStateMessageType.prediction_and_correction:
             self.route_optimizer.update_optimal_route(self.state)
             self.action_planner.pp_controller.update_path(self.route_optimizer.get_optimal_route(), self.state.speed)
-# TODO: change the code back to the note when finished)lap is a msgtype
-        # if state.messege_type != FormulaStateMessageType.finished_lap:
-        #     self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
-        self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
+
+        if state.messege_type != FormulaStateMessageType.finished_lap:
+            self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
 
     def process_state_est(self, state_est, time):
         if self.first_message_time == 0:
             self.first_message_time = time
         if time - self.first_message_time < 1500:
-            logging.info("Return 'dont start driving' because state code need more time to calc")
+            logging.info("Return 'don't start driving' because state code need more time to calc")
             out_msg = OutMsg(0, 0, 0, 0)
             return out_msg
 

@@ -57,7 +57,7 @@ class Control:
         out_msg = self._controller.process_state_est(formula_state, time)
         driving_instructions.gas = out_msg.gas
         driving_instructions.brakes = out_msg.brakes
-        driving_instructions.optimal_steering = out_msg.wheel_angle
+        driving_instructions.steering = out_msg.wheel_angle
         driving_instructions.optimal_speed = out_msg.speed
 
         # build the dashboard msg
@@ -69,11 +69,11 @@ class Control:
         # dash_instructions.brakes = dash_msg.optimal_brakes
         # dash_instructions.optimal_speed = dash_msg.optimal_speed
         # dash_instructions.optimal_steering = dash_msg.optimal_steering
-        # dash_instructions.optimalRoute = dash_msg.optimal_route
-        # dash_instructions.rightBound = dash_msg.right_bound
-        # dash_instructions.leftBound = dash_msg.left_bound
-        # dash_instructions.rightBoundCones = dash_msg.right_bound_cones
-        # dash_instructions.leftBoundCones = dash_msg.left_bound_cones
+        # dash_instructions.optimal_route = dash_msg.optimal_route
+        # dash_instructions.right_bound = dash_msg.right_bound
+        # dash_instructions.left_bound = dash_msg.left_bound
+        # dash_instructions.right_bound_cones = dash_msg.right_bound_cones
+        # dash_instructions.left_bound_cones = dash_msg.left_bound_cones
 
         return driving_instructions
 
