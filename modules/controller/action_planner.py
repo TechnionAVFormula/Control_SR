@@ -22,8 +22,8 @@ class ActionPlanner:
 
     def update_action(self, state: State, p: np.ndarray):
         self.state = state
-        # TODO: check with ofir and adi if the p.p now needs and in rad
-        self.state.angle = self.state.angle*180/3.141
+        # TODO: check with ofir and adi if the p.p now needs and in rad, now in rads
+        self.state.angle = self.state.angle
         self.pp_controller.update_state(self.state.abs_pos[0]-self.state.abs_prev_pos[0],
                                         self.state.abs_pos[1]-self.state.abs_prev_pos[1],
                                         self.state.speed,self.state.angle-self.state.prev_angle)
@@ -103,7 +103,8 @@ class ActionPlanner:
     def _calc_gas(self):
         if self.new_speed <= self.state.speed:
             self.new_gas = 0
-        self.new_gas = (self.new_speed - self.state.speed)/V_MAX
+        else:
+            self.new_gas = (self.new_speed - self.state.speed)/V_MAX
 
         # log printing
         logging.info(f"Optimal gas is {self.new_gas}")
@@ -111,9 +112,11 @@ class ActionPlanner:
     def _calc_brakes(self):
         if self.state.speed <= self.new_speed:
             self.new_brakes = 0
-        self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
+        else:
+            self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
 
         # log printing
         logging.info(f"Optimal brakes is {self.new_brakes}")
+
 
 

@@ -48,6 +48,7 @@ class Control:
         # dash_instructions = messages.control.ControlDashbaord
 
         logging.info(f"**** Calculation number {self.num_of_calc} ****")
+        logging.info(f"**** message number {formula_state_msg.header.id} ****")
         self.num_of_calc += 1
 
         # Insert algorithms
