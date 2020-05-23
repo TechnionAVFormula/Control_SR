@@ -57,7 +57,7 @@ class Control:
         out_msg = self._controller.process_state_est(formula_state, time)
         driving_instructions.gas = out_msg.gas
         driving_instructions.brakes = out_msg.brakes
-        driving_instructions.optimal_steering = out_msg.wheel_angle
+        driving_instructions.steering = out_msg.wheel_angle
         driving_instructions.optimal_speed = out_msg.speed
 
         # build the dashboard msg
