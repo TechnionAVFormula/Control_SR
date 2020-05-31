@@ -54,8 +54,7 @@ class ActionPlanner:
             # log printing
             logging.info("Speed is calculated by ending speed protocol")
 
-        if self.state.speed > V_MAX:
-            self.state.speed = V_MAX
+        self.new_speed = min(self.new_speed, V_MAX)
         logging.info(f"Optimal speed is {self.new_speed}")
 
     def _clac_ending_speed(self, dist: float, speed: float):
@@ -109,9 +108,6 @@ class ActionPlanner:
         else:
             self.new_gas = (self.new_speed - self.state.speed)/V_MAX
 
-        if self.new_gas > 1:
-            self.new_gas = 1
-
         # log printing
         logging.info(f"Optimal gas is {self.new_gas}")
 
@@ -120,9 +116,6 @@ class ActionPlanner:
             self.new_brakes = 0
         else:
             self.new_brakes = (self.state.speed - self.new_speed)/V_MAX
-
-        if self.new_brakes > 1:
-            self.new_brakes = 1
 
         # log printing
         logging.info(f"Optimal brakes is {self.new_brakes}")

@@ -49,7 +49,7 @@ class BasicController:
 
         state = control_state_from_est(state_est)
         self._update_state(state)
-        # steering, gas and speed are between zero to one 
+        # steering, gas and speed are between zero to one
         out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle/MAX_STEERING, speed=self.action_planner.new_speed,
                          gas=self.action_planner.new_gas, brakes=self.action_planner.new_brakes)
         return out_msg
