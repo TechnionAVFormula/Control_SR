@@ -28,38 +28,36 @@ class BasicController:
         converted_state = state.convert_coord_sys()
         self.state = converted_state
 
-# TODO: ask barak to change state msg, finished_lap as a msgType
-#         if state.messege_type == FormulaStateMessageType.finished_lap:
-#             self.finished_lap = True
-#         state.finished_lap = self.finished_lap
+        if state.messege_type == FormulaStateMessageType.finished_lap:
+            self.finished_lap = True
+        state.finished_lap = self.finished_lap
 
         if state.messege_type == FormulaStateMessageType.prediction_and_correction:
             self.route_optimizer.update_optimal_route(self.state)
             self.action_planner.pp_controller.update_path(self.route_optimizer.get_optimal_route(), self.state.speed)
-# TODO: change the code back to the note when finished)lap is a msgtype
-        # if state.messege_type != FormulaStateMessageType.finished_lap:
-        #     self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
-        self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
+
+        if state.messege_type != FormulaStateMessageType.finished_lap:
+            self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
 
     def process_state_est(self, state_est, time):
         if self.first_message_time == 0:
             self.first_message_time = time
         if time - self.first_message_time < 1500:
-            logging.info("Return 'dont start driving' because state code need more time to calc")
+            logging.info("Return 'don't start driving' because state code need more time to calc")
             out_msg = OutMsg(0, 0, 0, 0)
             return out_msg
 
         state = control_state_from_est(state_est)
         self._update_state(state)
-
-        out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle, speed=self.action_planner.new_speed,
+        # steering, gas and speed are between zero to one 
+        out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle/MAX_STEERING, speed=self.action_planner.new_speed,
                          gas=self.action_planner.new_gas, brakes=self.action_planner.new_brakes)
         return out_msg
 
     def get_dash_msg(self):
         current_position = self.state.pos
         # TODO: for now we use the car angle as the old steering angle, we need to change the dash or the info
-        current_steering_angle = self.state.angle/MAX_STEERING
+        current_steering_angle = self.state.angle
         current_speed = self.state.speed
         optimal_gas = self.action_planner.new_gas
         optimal_brakes = self.action_planner.new_brakes

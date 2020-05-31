@@ -9,6 +9,8 @@ from scipy.optimize import minimize
 
 from .mediator import State
 
+CAR_WID = 0.75 # 0.5 of the cars wid in meters
+
 
 class RouteOptimizer:
     def __init__(self, state: State):
@@ -25,7 +27,7 @@ class RouteOptimizer:
         for x in xs:
             r_constraint = abs(right_road_f(x) - (p[1] * x ** 3 + p[0] * x ** 2 + p1 * x + p0))
             l_constraint = abs(- left_road_f(x) + (p[1] * x ** 3 + p[0] * x ** 2 + p1 * x + p0))
-            road_wid = abs(right_road_f(x) - left_road_f(x))
+            road_wid = abs(right_road_f(x) - left_road_f(x) - CAR_WID)
             is_ok = r_constraint + l_constraint <= road_wid + state.deviation
             if not is_ok:
                 return -1
