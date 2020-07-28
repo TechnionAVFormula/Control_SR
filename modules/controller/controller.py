@@ -49,15 +49,15 @@ class BasicController:
 
         state = control_state_from_est(state_est)
         self._update_state(state)
-
-        out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle, speed=self.action_planner.new_speed,
+        # steering, gas and speed are between zero to one
+        out_msg = OutMsg(wheel_angle=self.action_planner.new_wheel_angle/MAX_STEERING, speed=self.action_planner.new_speed,
                          gas=self.action_planner.new_gas, brakes=self.action_planner.new_brakes)
         return out_msg
 
     def get_dash_msg(self):
         current_position = self.state.pos
         # TODO: for now we use the car angle as the old steering angle, we need to change the dash or the info
-        current_steering_angle = self.state.angle/MAX_STEERING
+        current_steering_angle = self.state.angle
         current_speed = self.state.speed
         optimal_gas = self.action_planner.new_gas
         optimal_brakes = self.action_planner.new_brakes
