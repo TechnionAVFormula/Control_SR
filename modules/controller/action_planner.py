@@ -22,13 +22,13 @@ class ActionPlanner:
 
     def update_action(self, state: State, p: np.ndarray):
         self.state = state
-        # TODO: check with ofir and adi if the p.p now needs and in rad, now in rads
+        # TODO: check with oren the diff between steering angle and car angle, which one we need to the mecanic speed bound calc?
         self.state.angle = self.state.angle
         self.pp_controller.update_state(self.state.abs_pos[0]-self.state.abs_prev_pos[0],
                                         self.state.abs_pos[1]-self.state.abs_prev_pos[1],
                                         self.state.speed,self.state.angle-self.state.prev_angle)
-        self._calc_speed(p) 
         self._calc_wheel_ang(self.state)
+        self._calc_speed(p, self.state.angle, self.new_wheel_angle)
         self._calc_gas()
         self._calc_brakes()
 
@@ -36,19 +36,24 @@ class ActionPlanner:
         if self.state.dist_to_end == 0:
             self.new_wheel_angle = 0
         else:
-            self.new_wheel_angle = (max(-self._wheel_angle_upper_bound(state.speed, self.new_speed),
-                                        self.pp_controller.calculate_steering())
-                                    if (self.pp_controller.calculate_steering() < 0)
-                                    else min(self.pp_controller.calculate_steering(),
-                                             self._wheel_angle_upper_bound(state.speed, self.new_speed)))
+            self.new_wheel_angle = self.pp_controller.calculate_steering()
+            # self.new_wheel_angle = (max(-self._wheel_angle_upper_bound(state.speed, self.new_speed),
+            #                             self.pp_controller.calculate_steering())
+            #                         if (self.pp_controller.calculate_steering() < 0)
+            #                         else min(self.pp_controller.calculate_steering(),
+            #                                  self._wheel_angle_upper_bound(state.speed, self.new_speed)))
         # log printing
         logging.info(f"Optimal steering angle is {self.new_wheel_angle}")
 
-    def _calc_speed(self, p: np.ndarray):
+    def _calc_speed(self, p: np.ndarray, old_steering_angle:float, new_steering_angle:float):
         if self.state.dist_to_end < 0:
-            self.new_speed = self._speed_upper_bound(p)
+            self.new_speed = min(self._analitic_speed_upper_bound(p),
+                                 self._mecanic_speed_upper_bound(old_steering_angle,new_steering_angle))
             # log printing
-            logging.info("Speed is calculated by radius of curvature protocol")
+            if self.new_speed == self._mecanic_speed_upper_bound(old_steering_angle,new_steering_angle):
+                logging.info("speed is bounded to prevent sliding")
+            else:
+                logging.info("Speed is calculated by radius of curvature protocol")
         else:
             self.new_speed = self._clac_ending_speed(self.state.dist_to_end, self.state.speed)
             # log printing
@@ -85,7 +90,7 @@ class ActionPlanner:
             return speed * 0.8
         return speed * 0.775
 
-    def _speed_upper_bound(self, p: np.ndarray):
+    def _analitic_speed_upper_bound(self, p: np.ndarray):
         road_dx = lambda x: 3 * p[0] * x ** 2 + 2 * p[1] * x + p[2]
         road_d2x = lambda x: 6 * p[0] * x + 2 * p[1]
 
@@ -98,6 +103,10 @@ class ActionPlanner:
         v = lambda x: min(np.sqrt(A_MAX * rc(x)), V_MAX)
 
         return v(self.state.pos[0])
+
+    def _mecanic_speed_upper_bound(self, old_steering_angle:float, new_steering_angle:float):
+        steering_angle = max(abs(old_steering_angle),abs(new_steering_angle))
+        return DELTA_T*A_MAX/np.tan(steering_angle)
 
     def _wheel_angle_upper_bound(self, old_speed: float, new_speed: float):
         return np.arctan(DELTA_T * (old_speed + new_speed) * 0.5 / (new_speed * new_speed / A_MAX))
