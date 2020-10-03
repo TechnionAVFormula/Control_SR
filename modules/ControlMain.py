@@ -52,9 +52,8 @@ class Control:
         self.num_of_calc += 1
 
         # Insert algorithms
-        time = formula_state_msg.header.timestamp.ToMilliseconds()
 
-        out_msg = self._controller.process_state_est(formula_state, time)
+        out_msg = self._controller.process_state_est(formula_state)
         driving_instructions.gas = out_msg.gas
         driving_instructions.brakes = out_msg.brakes
         driving_instructions.steering = out_msg.wheel_angle

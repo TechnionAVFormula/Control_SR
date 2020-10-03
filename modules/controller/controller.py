@@ -13,7 +13,6 @@ class BasicController:
         self.route_optimizer = RouteOptimizer(state=self.state)
         self.action_planner = ActionPlanner(state=self.state)
         self.finished_lap = False
-        self.first_message_time = 0
 
     def _update_state(self, state: State):
         for cone in state.l_road_bound:
@@ -39,10 +38,8 @@ class BasicController:
         if state.messege_type != FormulaStateMessageType.finished_lap:
             self.action_planner.update_action(self.state, self.route_optimizer.get_optimal_route())
 
-    def process_state_est(self, state_est, time):
-        if self.first_message_time == 0:
-            self.first_message_time = time
-        if time - self.first_message_time < 1500:
+    def process_state_est(self, state_est):
+        if state_est.messege_type == FormulaStateMessageType.still_calibrating:
             logging.info("Return 'don't start driving' because state code need more time to calc")
             out_msg = OutMsg(0, 0, 0, 0)
             return out_msg
