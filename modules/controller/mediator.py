@@ -103,8 +103,8 @@ def control_state_from_est(state_est):
         logging.warning("Only 4 cones or less, optimization may not work")
 
     for r_cone, l_cone in zip(state_est.right_bound_cones, state_est.left_bound_cones):
-        r_road_bound.append(np.array([r_cone.position.x, r_cone.position.y]))
-        l_road_bound.append(np.array([l_cone.position.x, l_cone.position.y]))
+        r_road_bound.append(np.array([r_cone.position.x, r_cone.position.y, r_cone.position_deviation]))
+        l_road_bound.append(np.array([l_cone.position.x, l_cone.position.y, l_cone.position_deviation]))
 
     angle = state_est.current_state.theta
     pos = np.array([state_est.current_state.position.x, state_est.current_state.position.y])
